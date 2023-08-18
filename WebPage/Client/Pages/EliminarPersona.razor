@@ -1,0 +1,73 @@
+﻿@page "/eliminar-persona"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using WebPage.Shared
+@using WebPage.Shared.Models
+@using WebPage.Shared.Services
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject CRUDService CrudService
+
+
+<h3>Eliminar Persona</h3>
+
+<form>
+    <div>
+        <label for="IdPer">ID:</label>
+        <input type="number" id="IdPer" @bind="persona.IdPer" />
+    </div>
+
+    <button type="button" @onclick="EliminarPersonaAsync">Eliminar</button>
+</form>
+<div class="@(string.IsNullOrEmpty(mensaje) ? "d-none" : "alert " + mensajeTipo)">
+    @mensaje
+</div>
+@code {
+    private Persona persona = new Persona
+        {
+            FNacimiento = DateTime.Now.Date, // Asigna la fecha actual a FNacimiento
+            Usuario = "2"
+        };
+
+    private async Task EliminarPersonaAsync()
+    {
+        
+        // No es necesario obtener el ID del usuario logueado ya que no lo estamos usando aquí
+        var success = await CrudService.EliminarPersonaAsync(persona.IdPer, "hol");
+        if (success)
+        {
+            // Manejar la respuesta exitosa aquí
+            // Limpiar el formulario
+            persona = new Persona
+                {
+                    FNacimiento = DateTime.Now.Date, // Asigna la fecha actual a FNacimiento
+                    Usuario = "1123"
+                };
+
+            // Mostrar mensaje emergente con respuesta exitosa
+            MostrarMensaje("Persona Eliminada exitosamente", TipoMensaje.Exito);
+        }
+        else
+        {
+            // Manejar la respuesta de error aquí
+        }
+    }
+    private enum TipoMensaje
+    {
+        Exito,
+        Error
+    }
+
+    private string mensaje = "";
+    private string mensajeTipo = "";
+
+    private void MostrarMensaje(string mensaje, TipoMensaje tipo)
+    {
+        this.mensaje = mensaje;
+        this.mensajeTipo = tipo == TipoMensaje.Exito ? "alert-success" : "alert-danger";
+    }
+}

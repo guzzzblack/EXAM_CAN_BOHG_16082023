@@ -1,0 +1,82 @@
+﻿@page "/agregar-persona"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using WebPage.Shared.Models
+@using WebPage.Shared.Services
+@using WebPage.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+@inject CRUDService CrudService
+
+<h3>Agregar Persona</h3>
+
+<form>
+    <div>
+        <label for="Nombre">Nombre:</label>
+        <input type="text" id="Nombre" @bind="persona.Nombre" />
+    </div>
+    <div>
+        <label for="Paterno">Paterno:</label>
+        <input type="text" id="Paterno" @bind="persona.Paterno" />
+    </div>
+    <div>
+        <label for="Materno">Materno:</label>
+        <input type="text" id="Materno" @bind="persona.Materno" />
+    </div>
+    <div>
+        <label for="RFC">RFC:</label>
+        <input type="text" id="RFC" @bind="persona.RFC" />
+    </div>
+    <div>
+        <label for="FNacimiento">Fecha de Nacimiento:</label>
+        <input type="date" id="FNacimiento" @bind="persona.FNacimiento" />
+    </div>
+
+    <button type="button" @onclick="AgregarPersonaAsync">Agregar</button>
+</form>
+<div class="@(string.IsNullOrEmpty(mensaje) ? "d-none" : "alert " + mensajeTipo)">
+    @mensaje
+</div>
+@code {
+    private Persona persona = new Persona
+        {
+            FNacimiento = DateTime.Now.Date, // Asigna la fecha actual a FNacimiento
+            Usuario = "1123"
+        };
+    
+    private async Task AgregarPersonaAsync()
+    {
+        var success = await CrudService.AgregarPersonaAsync(persona);
+        if (success)
+        {
+            // Manejar la respuesta exitosa aquí
+            // Limpiar el formulario
+            persona = new Persona
+                {
+                    FNacimiento = DateTime.Now.Date, // Asigna la fecha actual a FNacimiento
+                    Usuario = "1123"
+                };
+
+            // Mostrar mensaje emergente con respuesta exitosa
+            MostrarMensaje("Persona agregada exitosamente", TipoMensaje.Exito);
+        }
+        else
+        {
+            // Manejar la respuesta de error aquí
+        }
+    }
+    private enum TipoMensaje
+    {
+        Exito,
+        Error
+    }
+
+    private string mensaje = "";
+    private string mensajeTipo = "";
+
+    private void MostrarMensaje(string mensaje, TipoMensaje tipo)
+    {
+        this.mensaje = mensaje;
+        this.mensajeTipo = tipo == TipoMensaje.Exito ? "alert-success" : "alert-danger";
+    }
+}

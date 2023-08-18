@@ -1,0 +1,86 @@
+﻿@page "/actualizar-persona"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using WebPage.Shared.Models
+@using WebPage.Shared.Services
+@using WebPage.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+@inject CRUDService CrudService
+
+<h3>Actualizar Persona</h3>
+
+<div>
+    <label for="IdPer">ID:</label>
+    <input type="number" id="IdPer" @bind="idPersona" />
+    <button type="button" @onclick="BuscarPersona">Buscar</button>
+</div>
+
+<form style="display: @(personaEncontrada == null ? "none" : "block")">
+    <div>
+        <label for="Nombre">Nombre:</label>
+        <input type="text" id="Nombre" @bind="personaEncontrada.Nombre" disabled="@(!formularioHabilitado)" />
+    </div>
+    <div>
+        <label for="Paterno">Paterno:</label>
+        <input type="text" id="Paterno" @bind="personaEncontrada.Paterno" disabled="@(!formularioHabilitado)" />
+    </div>
+    <div>
+        <label for="Materno">Materno:</label>
+        <input type="text" id="Materno" @bind="personaEncontrada.Materno" disabled="@(!formularioHabilitado)" />
+    </div>
+    <div>
+        <label for="RFC">RFC:</label>
+        <input type="text" id="RFC" @bind="personaEncontrada.RFC" disabled="@(!formularioHabilitado)" />
+    </div>
+    <div>
+        <label for="FNacimiento">Fecha de Nacimiento:</label>
+        <input type="date" id="FNacimiento" @bind="personaEncontrada.FNacimiento" disabled="@(!formularioHabilitado)" />
+    </div>
+
+    <button type="button" @onclick="ActualizarPersonaAsync" disabled="@(!puedeActualizar || !formularioHabilitado)">Actualizar</button>
+</form>
+
+<div class="@(string.IsNullOrEmpty(mensaje) ? "d-none" : "alert " + mensajeTipo)">
+    @mensaje
+</div>
+@code {
+    private int idPersona;
+    private Persona personaEncontrada = new Persona();
+    private bool puedeActualizar = false;
+    private bool formularioHabilitado = false;
+    private async Task BuscarPersona()
+    {
+        personaEncontrada = await CrudService.GetPersonaAsync(idPersona);
+        puedeActualizar = personaEncontrada != null;
+        formularioHabilitado = true;
+    }
+
+    private async Task ActualizarPersonaAsync()
+    {
+        var success = await CrudService.ActualizarPersonaAsync(personaEncontrada);
+        if (success)
+        {
+            // Manejar la respuesta exitosa aquí
+            MostrarMensaje("Persona agregada exitosamente", TipoMensaje.Exito);
+        }
+        else
+        {
+            // Manejar la respuesta de error aquí
+        }
+    }
+    private enum TipoMensaje
+    {
+        Exito,
+        Error
+    }
+
+    private string mensaje = "";
+    private string mensajeTipo = "";
+
+    private void MostrarMensaje(string mensaje, TipoMensaje tipo)
+    {
+        this.mensaje = mensaje;
+        this.mensajeTipo = tipo == TipoMensaje.Exito ? "alert-success" : "alert-danger";
+    }
+}
